@@ -138,10 +138,10 @@ textarea.finput{min-height:90px;resize:vertical}
       </select>
       <label class="flabel">Description</label>
       <textarea class="finput" id="uDesc" placeholder="Enter video description..."></textarea>
-      <div class="drop-zone" onclick="showToast('&#128193; File picker would open here in production')">
-        &#128193; DRAG FILE HERE OR CLICK TO BROWSE
+      <div class="drop-zone" onclick="showToast('&#128193; Use URL-based upload below')">
+        &#128193; FILE UPLOAD DISABLED ON STATIC HOSTING — USE URL INPUTS
       </div>
-      <button class="btn-upload" onclick="handleUpload()">&#9650; UPLOAD VIDEO</button>
+      <button class="btn-upload" onclick="handleUpload()">&#9650; UPLOAD VIDEO (BY URL)</button>
     </div>
 
     <!-- EDIT VIDEOS -->
@@ -164,92 +164,211 @@ textarea.finput{min-height:90px;resize:vertical}
   </div>
 </div>
 
+<!-- EDIT MODAL (centered cyber-neon) -->
+<div id="editModal" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.75);z-index:9998;">
+  <div style="width:420px;max-width:90%;background:linear-gradient(135deg,#1a2332,#0f1620);border:2px solid #00d9ff;box-shadow:0 0 30px rgba(0,217,255,.7);border-radius:10px;padding:1.5rem;position:relative;">
+    <button onclick="closeEditModal()" style="position:absolute;top:8px;right:10px;background:transparent;border:none;color:#ff10f0;font-size:1.2rem;cursor:pointer;">✕</button>
+    <h2 style="font-size:1rem;letter-spacing:2px;color:#00d9ff;margin-bottom:1rem;">EDIT VIDEO</h2>
+    <label class="flabel">Video Title</label>
+    <input type="text" class="finput" id="eTitle">
+    <label class="flabel">Channel Name</label>
+    <input type="text" class="finput" id="eChan">
+    <label class="flabel">Category</label>
+    <select class="finput" id="eCat" style="cursor:pointer;">
+      <option>Gaming</option><option>Tech</option><option>Music</option>
+      <option>Education</option><option>Entertainment</option>
+    </select>
+    <label class="flabel">Description</label>
+    <textarea class="finput" id="eDesc"></textarea>
+    <label class="flabel">Video URL</label>
+    <input type="text" class="finput" id="eSrc" placeholder="https://...">
+    <label class="flabel">Thumbnail URL</label>
+    <input type="text" class="finput" id="eThumb" placeholder="https://...">
+    <button class="btn-upload" onclick="saveEdit()">SAVE CHANGES</button>
+  </div>
+</div>
+
 <div class="toast" id="toastEl"></div>
 
 <script>
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   VIDEO_DB — MUST be defined before
-   any function below references it
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-var VIDEO_DB = [
-  {id:"vid001",title:"Cyberpunk 2077 Ultimate Graphics Mod Showcase",thumbnail:"https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=100&h=56&fit=crop",views:"2.1M",date:"3 days ago"},
-  {id:"vid002",title:"Building a Neural Network from Scratch",thumbnail:"https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=100&h=56&fit=crop",views:"1.2M",date:"2 weeks ago"},
-  {id:"vid003",title:"Synthwave Music Production Tutorial",thumbnail:"https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=100&h=56&fit=crop",views:"856K",date:"1 month ago"},
-  {id:"vid004",title:"Quantum Computing Explained Simply",thumbnail:"https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=100&h=56&fit=crop",views:"3.4M",date:"1 week ago"},
-  {id:"vid005",title:"Apex Legends Season 20 Pro Tips",thumbnail:"https://images.unsplash.com/photo-1542751371-adc38448a05e?w=100&h=56&fit=crop",views:"980K",date:"5 days ago"},
-  {id:"vid006",title:"The Future of AI in 2026",thumbnail:"https://images.unsplash.com/photo-1677442136019-21780ecad995?w=100&h=56&fit=crop",views:"5.7M",date:"2 days ago"},
-  {id:"vid007",title:"Creating Electronic Music with Modular Synths",thumbnail:"https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=100&h=56&fit=crop",views:"412K",date:"3 weeks ago"},
-  {id:"vid008",title:"Introduction to Blockchain Technology",thumbnail:"https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=100&h=56&fit=crop",views:"1.8M",date:"2 months ago"},
-  {id:"vid009",title:"Sci-Fi Short Film: Neon Nights",thumbnail:"https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=100&h=56&fit=crop",views:"7.2M",date:"6 days ago"},
-  {id:"vid010",title:"Elden Ring Boss Guide: Malenia",thumbnail:"https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=100&h=56&fit=crop",views:"4.5M",date:"1 month ago"},
-  {id:"vid011",title:"Building Microservices with Kubernetes",thumbnail:"https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?w=100&h=56&fit=crop",views:"623K",date:"2 weeks ago"},
-  {id:"vid012",title:"Jazz Piano Improvisation Masterclass",thumbnail:"https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?w=100&h=56&fit=crop",views:"299K",date:"1 month ago"},
-  {id:"vid013",title:"Data Structures and Algorithms Crash Course",thumbnail:"https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=100&h=56&fit=crop",views:"2.9M",date:"3 months ago"},
-  {id:"vid014",title:"Behind the Scenes: VFX Breakdown",thumbnail:"https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=100&h=56&fit=crop",views:"1.1M",date:"2 weeks ago"},
-  {id:"vid015",title:"Valorant Ranked Guide: Iron to Radiant",thumbnail:"https://images.unsplash.com/photo-1552820728-8b83bb6b773f?w=100&h=56&fit=crop",views:"3.3M",date:"4 days ago"},
-  {id:"vid016",title:"Machine Learning Model Deployment",thumbnail:"https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=100&h=56&fit=crop",views:"445K",date:"1 week ago"},
-  {id:"vid017",title:"Music Theory for Producers",thumbnail:"https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=100&h=56&fit=crop",views:"1.5M",date:"3 weeks ago"},
-  {id:"vid018",title:"Understanding Cryptocurrency Trading",thumbnail:"https://images.unsplash.com/photo-1621761191319-c6fb62004040?w=100&h=56&fit=crop",views:"2.2M",date:"5 days ago"}
+/* ── Default DB (for stats only) ── */
+var DEFAULT_DB = [
+  {id:"vid001",title:"Cyberpunk 2077 Ultimate Graphics Mod Showcase"},
+  {id:"vid002",title:"Building a Neural Network from Scratch"},
+  {id:"vid003",title:"Synthwave Music Production Tutorial"},
+  {id:"vid004",title:"Quantum Computing Explained Simply"},
+  {id:"vid005",title:"Apex Legends Season 20 Pro Tips"},
+  {id:"vid006",title:"The Future of AI in 2026"},
+  {id:"vid007",title:"Creating Electronic Music with Modular Synths"},
+  {id:"vid008",title:"Introduction to Blockchain Technology"},
+  {id:"vid009",title:"Sci-Fi Short Film: Neon Nights"},
+  {id:"vid010",title:"Elden Ring Boss Guide: Malenia"},
+  {id:"vid011",title:"Building Microservices with Kubernetes"},
+  {id:"vid012",title:"Jazz Piano Improvisation Masterclass"},
+  {id:"vid013",title:"Data Structures and Algorithms Crash Course"},
+  {id:"vid014",title:"Behind the Scenes: VFX Breakdown"},
+  {id:"vid015",title:"Valorant Ranked Guide: Iron to Radiant"},
+  {id:"vid016",title:"Machine Learning Model Deployment"},
+  {id:"vid017",title:"Music Theory for Producers"},
+  {id:"vid018",title:"Understanding Cryptocurrency Trading"}
 ];
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   AUTH CHECK — safe, runs after VIDEO_DB
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ── AUTH CHECK ── */
 (function() {
   var ok = false;
   try { ok = (sessionStorage.getItem("csAdmin") === "yes"); } catch(e) {}
   if (!ok) { location.replace("login.html"); }
 })();
 
-/* ── Update stat ── */
-document.getElementById("sTot").textContent = VIDEO_DB.length;
-
-/* ── Render video list ── */
-var listHTML = "";
-for (var i = 0; i < VIDEO_DB.length; i++) {
-  var v = VIDEO_DB[i];
-  listHTML += '<div class="vrow">'
-    + '<img class="vthumb" src="' + v.thumbnail + '" alt="' + v.title + '" onerror="this.src=\'https://placehold.co/90x51/1a2332/00d9ff?text=N%2FA\'">'
-    + '<div class="vmeta"><div class="vtitle" title="' + v.title + '">' + v.title + '</div>'
-    + '<div class="vviews">' + v.views + ' views &middot; ' + v.date + '</div></div>'
-    + '<div class="vacts">'
-    + '<button class="bico be" onclick="editV(\'' + v.id + '\')" title="Edit">&#9998;</button>'
-    + '<button class="bico bd" onclick="delV(\'' + v.id + '\')" title="Delete">&#128465;</button>'
-    + '</div></div>';
-}
-document.getElementById("vlist").innerHTML = listHTML;
-
-/* ── Actions ── */
-function findV(id) {
-  for (var i = 0; i < VIDEO_DB.length; i++) {
-    if (VIDEO_DB[i].id === id) return VIDEO_DB[i];
+/* ── Admin video storage (localStorage) ── */
+function loadAdminVideos() {
+  try {
+    var raw = localStorage.getItem("csVideos");
+    if (!raw) return [];
+    var arr = JSON.parse(raw);
+    if (!Array.isArray(arr)) return [];
+    return arr;
+  } catch(e) {
+    return [];
   }
-  return null;
 }
+function saveAdminVideos(list) {
+  try {
+    localStorage.setItem("csVideos", JSON.stringify(list));
+  } catch(e) {}
+}
+
+/* ── State ── */
+var ADMIN_VIDEOS = loadAdminVideos();
+var editingId = null;
+
+/* ── Stats ── */
+document.getElementById("sTot").textContent = DEFAULT_DB.length + ADMIN_VIDEOS.length;
+
+/* ── Render admin list ── */
+function renderAdminList() {
+  var listHTML = "";
+  for (var i = 0; i < ADMIN_VIDEOS.length; i++) {
+    var v = ADMIN_VIDEOS[i];
+    listHTML += '<div class="vrow">'
+      + '<img class="vthumb" src="' + (v.thumbnail || 'https://placehold.co/90x51/1a2332/00d9ff?text=THUMB') + '" alt="' + v.title + '" onerror="this.src=\'https://placehold.co/90x51/1a2332/00d9ff?text=N%2FA\'">'
+      + '<div class="vmeta"><div class="vtitle" title="' + v.title + '">' + v.title + '</div>'
+      + '<div class="vviews">' + (v.channel || "Custom Upload") + '</div></div>'
+      + '<div class="vacts">'
+      + '<button class="bico be" onclick="editV(\'' + v.id + '\')" title="Edit">&#9998;</button>'
+      + '<button class="bico bd" onclick="delV(\'' + v.id + '\')" title="Delete">&#128465;</button>'
+      + '</div></div>';
+  }
+  if (!ADMIN_VIDEOS.length) {
+    listHTML = '<div style="font-size:.8rem;color:#8b96a8;">No custom videos yet. Upload one on the left.</div>';
+  }
+  document.getElementById("vlist").innerHTML = listHTML;
+}
+renderAdminList();
+
+/* ── Upload (URL-based) ── */
+function handleUpload() {
+  var t = document.getElementById("uTitle").value.trim();
+  var ch = document.getElementById("uChan").value.trim();
+  var cat = document.getElementById("uCat").value;
+  var desc = document.getElementById("uDesc").value.trim();
+  if (!t) { showToast("&#9888; Please enter a video title first"); return; }
+
+  var src = prompt("Enter VIDEO URL (mp4 / stream / embed):", "");
+  if (!src) { showToast("&#9888; Video URL is required"); return; }
+  var thumb = prompt("Enter THUMBNAIL URL (or leave blank for placeholder):", "");
+
+  var id = "u" + Date.now();
+  var v = {
+    id: id,
+    title: t,
+    channel: ch || "Custom Channel",
+    category: cat,
+    description: desc || "No description provided.",
+    src: src,
+    thumbnail: thumb || ""
+  };
+  ADMIN_VIDEOS.push(v);
+  saveAdminVideos(ADMIN_VIDEOS);
+  renderAdminList();
+  document.getElementById("sTot").textContent = DEFAULT_DB.length + ADMIN_VIDEOS.length;
+  showToast('&#10003; "' + t + '" added to library!');
+
+  document.getElementById("uTitle").value = "";
+  document.getElementById("uChan").value  = "";
+  document.getElementById("uDesc").value  = "";
+}
+
+/* ── Edit / Delete ── */
+function findAdminIndex(id) {
+  for (var i = 0; i < ADMIN_VIDEOS.length; i++) {
+    if (ADMIN_VIDEOS[i].id === id) return i;
+  }
+  return -1;
+}
+
 function editV(id) {
-  var v = findV(id);
-  if (v) showToast('&#9998; Editing: "' + v.title + '"');
+  var idx = findAdminIndex(id);
+  if (idx === -1) { showToast("&#9888; Video not found"); return; }
+  var v = ADMIN_VIDEOS[idx];
+  editingId = id;
+
+  document.getElementById("eTitle").value = v.title || "";
+  document.getElementById("eChan").value  = v.channel || "";
+  document.getElementById("eCat").value   = v.category || "Gaming";
+  document.getElementById("eDesc").value  = v.description || "";
+  document.getElementById("eSrc").value   = v.src || "";
+  document.getElementById("eThumb").value = v.thumbnail || "";
+
+  document.getElementById("editModal").style.display = "flex";
 }
+
+function closeEditModal() {
+  editingId = null;
+  document.getElementById("editModal").style.display = "none";
+}
+
+function saveEdit() {
+  if (!editingId) { closeEditModal(); return; }
+  var idx = findAdminIndex(editingId);
+  if (idx === -1) { closeEditModal(); return; }
+
+  var v = ADMIN_VIDEOS[idx];
+  v.title      = document.getElementById("eTitle").value.trim() || v.title;
+  v.channel    = document.getElementById("eChan").value.trim()  || v.channel;
+  v.category   = document.getElementById("eCat").value;
+  v.description= document.getElementById("eDesc").value.trim()  || v.description;
+  v.src        = document.getElementById("eSrc").value.trim()   || v.src;
+  v.thumbnail  = document.getElementById("eThumb").value.trim() || v.thumbnail;
+
+  saveAdminVideos(ADMIN_VIDEOS);
+  renderAdminList();
+  closeEditModal();
+  showToast("&#10003; Changes saved");
+}
+
 function delV(id) {
-  var v = findV(id);
-  if (v && confirm('Delete "' + v.title + '"?\nThis cannot be undone.')) {
+  var idx = findAdminIndex(id);
+  if (idx === -1) { showToast("&#9888; Video not found"); return; }
+  var v = ADMIN_VIDEOS[idx];
+  if (confirm('Delete "' + v.title + '"?\nThis cannot be undone.')) {
+    ADMIN_VIDEOS.splice(idx, 1);
+    saveAdminVideos(ADMIN_VIDEOS);
+    renderAdminList();
+    document.getElementById("sTot").textContent = DEFAULT_DB.length + ADMIN_VIDEOS.length;
     showToast('&#128465; Deleted: "' + v.title + '"');
   }
 }
+
+/* ── Maintenance settings ── */
 function applySettings() {
   var s = document.getElementById("t1").checked;
   var a = document.getElementById("t2").checked;
   var c = document.getElementById("t3").checked;
   showToast("&#10003; Saved! Site:" + (s ? "ONLINE" : "OFFLINE") + " Admin:" + (a ? "ON" : "OFF") + " Countdown:" + (c ? "ON" : "OFF"));
 }
-function handleUpload() {
-  var t = document.getElementById("uTitle").value.trim();
-  if (!t) { showToast("&#9888; Please enter a video title first"); return; }
-  showToast('&#10003; "' + t + '" queued for upload!');
-  document.getElementById("uTitle").value = "";
-  document.getElementById("uChan").value  = "";
-  document.getElementById("uDesc").value  = "";
-}
+
+/* ── Logout ── */
 function doLogout() {
   if (confirm("Logout of admin panel?")) {
     try { sessionStorage.removeItem("csAdmin"); } catch(e) {}
