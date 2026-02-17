@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADMIN TERMINAL // CYBERSTREAM</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0d1117;--p1:#1a2332;--p2:#0f1620;--cyan:#00d9ff;--yellow:#ffed4e;--green:#39ff14;--pink:#ff10f0;--blue:#5ba4cf;--text:#e0e0e0;--muted:#8b96a8}
+body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;min-height:100vh;overflow-x:hidden}
+.grid-bg{position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(0,217,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,217,255,.03) 1px,transparent 1px);background-size:50px 50px}
+.wrap{max-width:1600px;margin:0 auto;padding:0 2rem;position:relative;z-index:2}
+/* Header */
+.hdr{background:linear-gradient(135deg,#1a3a52,var(--bg));border:3px solid var(--cyan);margin:2rem 0;padding:1.5rem 2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;box-shadow:0 0 40px rgba(0,217,255,.4)}
+.hl{display:flex;align-items:center;gap:1rem}
+.lightning{font-size:2.3rem;filter:drop-shadow(0 0 10px var(--yellow))}
+.hl h1{font-size:2rem;color:var(--cyan);text-shadow:0 0 20px rgba(0,217,255,.8);letter-spacing:4px}
+.hcontrols{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+.pill{display:flex;align-items:center;gap:.4rem;font-size:.82rem}
+.dot{width:12px;height:12px;border-radius:50%;animation:dp 2s infinite}
+.dg{background:var(--green);box-shadow:0 0 12px var(--green)}
+.dy{background:var(--yellow);box-shadow:0 0 12px var(--yellow)}
+@keyframes dp{0%,100%{opacity:1}50%{opacity:.4}}
+.abtn{padding:.6rem 1.2rem;border-radius:6px;font-family:'Courier New',monospace;font-size:.82rem;font-weight:bold;cursor:pointer;transition:all .3s;letter-spacing:1px;text-decoration:none;display:inline-flex;align-items:center;gap:.4rem}
+.btn-home{background:rgba(0,217,255,.1);border:2px solid var(--cyan);color:var(--cyan)}
+.btn-home:hover{background:rgba(0,217,255,.25);box-shadow:0 0 20px rgba(0,217,255,.5);transform:translateY(-2px)}
+.btn-out{background:rgba(255,16,240,.12);border:2px solid var(--pink);color:var(--pink)}
+.btn-out:hover{background:rgba(255,16,240,.3);box-shadow:0 0 20px rgba(255,16,240,.5);transform:translateY(-2px)}
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:2rem;margin-bottom:2.5rem}
+.stat{background:linear-gradient(135deg,var(--p1),var(--p2));border:2px solid var(--yellow);border-radius:8px;padding:2rem;text-align:center;transition:all .3s;cursor:default}
+.stat:hover{transform:translateY(-6px);box-shadow:0 12px 40px rgba(255,237,78,.3)}
+.sv{font-size:3.5rem;font-weight:bold;color:var(--yellow);text-shadow:0 0 30px rgba(255,237,78,.8);line-height:1;margin-bottom:.4rem}
+.sl{font-size:.78rem;color:var(--blue);letter-spacing:3px;text-transform:uppercase}
+/* Panels */
+.panels{display:grid;grid-template-columns:280px 1fr 1fr 300px;gap:2rem;margin-bottom:3rem}
+.panel{background:linear-gradient(135deg,var(--p1),var(--p2));border:2px solid;border-radius:12px;padding:1.8rem}
+.pm{border-color:var(--blue)}.pu{border-color:var(--pink)}.pe{border-color:var(--cyan)}.ps{border-color:var(--blue)}
+.ph{display:flex;align-items:center;gap:.8rem;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid rgba(255,255,255,.08)}
+.pi{font-size:1.8rem}
+.ph h2{font-size:1.05rem;font-weight:bold;letter-spacing:2px;text-transform:uppercase}
+/* Toggles */
+.ti{display:flex;justify-content:space-between;align-items:center;padding:1.1rem;background:rgba(0,0,0,.3);border:1px solid rgba(91,164,207,.22);border-radius:8px;margin-bottom:1.1rem;transition:all .3s}
+.ti:hover{border-color:var(--cyan);background:rgba(0,217,255,.06)}
+.tl{font-size:.82rem;letter-spacing:1px}
+.ts{position:relative;width:58px;height:28px;flex-shrink:0}
+.ts input{opacity:0;width:0;height:0}
+.sldr{position:absolute;cursor:pointer;inset:0;background:#1a2332;border:2px solid var(--cyan);border-radius:34px;transition:.4s}
+.sldr::before{content:'';position:absolute;width:18px;height:18px;bottom:3px;left:3px;background:var(--cyan);border-radius:50%;transition:.4s;box-shadow:0 0 10px var(--cyan)}
+.ts input:checked+.sldr{background:rgba(57,255,20,.18);border-color:var(--green)}
+.ts input:checked+.sldr::before{transform:translateX(30px);background:var(--green);box-shadow:0 0 14px var(--green)}
+.btn-apply{width:100%;padding:.95rem;background:linear-gradient(135deg,var(--blue),var(--cyan));border:none;color:var(--bg);font-family:'Courier New',monospace;font-size:.95rem;font-weight:bold;border-radius:6px;cursor:pointer;letter-spacing:2px;transition:all .3s;box-shadow:0 0 20px rgba(0,217,255,.4)}
+.btn-apply:hover{transform:translateY(-2px);box-shadow:0 0 30px rgba(0,217,255,.7)}
+/* Upload form */
+.flabel{display:block;font-size:.72rem;color:var(--muted);letter-spacing:2px;margin-bottom:.45rem;text-transform:uppercase}
+.finput{width:100%;padding:.75rem;background:rgba(0,0,0,.35);border:2px solid rgba(255,16,240,.3);color:var(--text);font-family:'Courier New',monospace;border-radius:6px;margin-bottom:1.1rem;transition:all .3s;outline:none}
+.finput:focus,.finput:hover{border-color:var(--pink);box-shadow:0 0 16px rgba(255,16,240,.3);background:rgba(255,16,240,.04)}
+textarea.finput{min-height:90px;resize:vertical}
+.drop-zone{border:2px dashed rgba(255,16,240,.45);border-radius:8px;padding:1.8rem;text-align:center;cursor:pointer;background:rgba(255,16,240,.04);transition:all .3s;font-size:.9rem;color:var(--muted)}
+.drop-zone:hover{border-color:var(--pink);background:rgba(255,16,240,.1);color:var(--pink)}
+.btn-upload{width:100%;margin-top:1rem;padding:.9rem;background:linear-gradient(135deg,var(--pink),#cc00cc);border:none;color:#fff;font-family:'Courier New',monospace;font-size:.9rem;font-weight:bold;border-radius:6px;cursor:pointer;letter-spacing:2px;transition:all .3s;box-shadow:0 0 20px rgba(255,16,240,.4)}
+.btn-upload:hover{transform:translateY(-2px);box-shadow:0 0 30px rgba(255,16,240,.7)}
+/* Video list */
+.vlist{max-height:520px;overflow-y:auto}
+.vlist::-webkit-scrollbar{width:6px}
+.vlist::-webkit-scrollbar-track{background:var(--p2)}
+.vlist::-webkit-scrollbar-thumb{background:var(--cyan);border-radius:4px}
+.vrow{display:flex;gap:.8rem;align-items:center;padding:.9rem;background:rgba(0,0,0,.3);border:1px solid rgba(0,217,255,.25);border-left:4px solid var(--cyan);border-radius:6px;margin-bottom:.9rem;transition:all .3s}
+.vrow:hover{background:rgba(0,217,255,.08);border-left-width:7px}
+.vthumb{width:90px;height:51px;object-fit:cover;border-radius:4px;border:1px solid var(--cyan);flex-shrink:0}
+.vmeta{flex:1;min-width:0}
+.vtitle{font-size:.88rem;font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:.2rem}
+.vviews{font-size:.75rem;color:var(--muted)}
+.vacts{display:flex;gap:.45rem;flex-shrink:0}
+.bico{width:36px;height:36px;border-radius:6px;border:1px solid;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all .3s;background:transparent}
+.be{color:#ff8c00;border-color:#ff8c00}
+.be:hover{background:rgba(255,140,0,.2);box-shadow:0 0 14px rgba(255,140,0,.5);transform:scale(1.1)}
+.bd{color:#8b5cf6;border-color:#8b5cf6}
+.bd:hover{background:rgba(139,92,246,.2);box-shadow:0 0 14px rgba(139,92,246,.5);transform:scale(1.1)}
+/* Settings */
+.srow{display:flex;justify-content:space-between;align-items:center;padding:.95rem 0;border-bottom:1px solid rgba(255,255,255,.08);transition:all .3s}
+.srow:last-child{border-bottom:none}
+.srow:hover{padding-left:.5rem}
+.slbl{font-size:.88rem}
+.sval{font-size:.95rem;font-weight:bold;color:var(--green);text-shadow:0 0 10px rgba(57,255,20,.5)}
+/* Toast */
+.toast{position:fixed;bottom:2rem;right:2rem;z-index:9999;background:linear-gradient(135deg,var(--p1),var(--p2));border:2px solid var(--green);color:var(--green);border-radius:8px;padding:1rem 1.5rem;font-size:.9rem;letter-spacing:1px;box-shadow:0 0 30px rgba(57,255,20,.4);opacity:0;transform:translateY(20px);transition:all .4s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+@media(max-width:1400px){.panels{grid-template-columns:1fr 1fr}}
+@media(max-width:768px){.panels{grid-template-columns:1fr}.hdr{flex-direction:column}.wrap{padding:0 1rem}}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+
+<div class="wrap">
+  <header class="hdr">
+    <div class="hl">
+      <span class="lightning">&#9889;</span>
+      <h1>ADMIN TERMINAL</h1>
+    </div>
+    <div class="hcontrols">
+      <div class="pill"><span class="dot dg"></span>&nbsp;SYSTEM ONLINE</div>
+      <div class="pill"><span class="dot dy"></span>&nbsp;CPU: 42%</div>
+      <a href="index.html" class="abtn btn-home">&#8592; HOME</a>
+      <button class="abtn btn-out" onclick="doLogout()">&#128682; LOGOUT</button>
+    </div>
+  </header>
+
+  <div class="stats">
+    <div class="stat"><div class="sv" id="sTot">18</div><div class="sl">Total Videos</div></div>
+    <div class="stat"><div class="sv">8.4M</div><div class="sl">Total Views</div></div>
+    <div class="stat"><div class="sv">247</div><div class="sl">Active Users</div></div>
+    <div class="stat"><div class="sv">99.8%</div><div class="sl">Uptime</div></div>
+  </div>
+
+  <div class="panels">
+    <!-- MAINTENANCE -->
+    <div class="panel pm">
+      <div class="ph"><span class="pi">&#128295;</span><h2>Maintenance Mode</h2></div>
+      <div class="ti"><span class="tl">SITE STATUS</span><label class="ts"><input type="checkbox" checked id="t1"><span class="sldr"></span></label></div>
+      <div class="ti"><span class="tl">ALLOW ADMIN ACCESS</span><label class="ts"><input type="checkbox" checked id="t2"><span class="sldr"></span></label></div>
+      <div class="ti"><span class="tl">SHOW COUNTDOWN</span><label class="ts"><input type="checkbox" id="t3"><span class="sldr"></span></label></div>
+      <button class="btn-apply" onclick="applySettings()">APPLY CHANGES</button>
+    </div>
+
+    <!-- UPLOAD -->
+    <div class="panel pu">
+      <div class="ph"><span class="pi">&#128190;</span><h2>Upload Video</h2></div>
+      <label class="flabel">Video Title</label>
+      <input type="text" class="finput" id="uTitle" placeholder="Enter video title...">
+      <label class="flabel">Channel Name</label>
+      <input type="text" class="finput" id="uChan" placeholder="Enter channel name...">
+      <label class="flabel">Category</label>
+      <select class="finput" id="uCat" style="cursor:pointer;">
+        <option>Gaming</option><option>Tech</option><option>Music</option>
+        <option>Education</option><option>Entertainment</option>
+      </select>
+      <label class="flabel">Description</label>
+      <textarea class="finput" id="uDesc" placeholder="Enter video description..."></textarea>
+      <div class="drop-zone" onclick="showToast('&#128193; File picker would open here in production')">
+        &#128193; DRAG FILE HERE OR CLICK TO BROWSE
+      </div>
+      <button class="btn-upload" onclick="handleUpload()">&#9650; UPLOAD VIDEO</button>
+    </div>
+
+    <!-- EDIT VIDEOS -->
+    <div class="panel pe">
+      <div class="ph"><span class="pi">&#9998;&#65039;</span><h2>Edit Videos</h2></div>
+      <div class="vlist" id="vlist"></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="panel ps">
+      <div class="ph"><span class="pi">&#9881;&#65039;</span><h2>System Settings</h2></div>
+      <div class="srow"><span class="slbl">Max Upload Size</span><span class="sval">500MB</span></div>
+      <div class="srow"><span class="slbl">Video Quality</span><span class="sval">1080p</span></div>
+      <div class="srow"><span class="slbl">Auto-Backup</span><span class="sval">ENABLED</span></div>
+      <div class="srow"><span class="slbl">CDN Status</span><span class="sval">ACTIVE</span></div>
+      <div class="srow"><span class="slbl">Cache Duration</span><span class="sval">24H</span></div>
+      <div class="srow"><span class="slbl">Storage Used</span><span class="sval">184GB</span></div>
+      <div class="srow"><span class="slbl">Server Region</span><span class="sval">US-EAST</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toastEl"></div>
+
+<script>
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   VIDEO_DB — MUST be defined before
+   any function below references it
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+var VIDEO_DB = [
+  {id:"vid001",title:"Cyberpunk 2077 Ultimate Graphics Mod Showcase",thumbnail:"https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=100&h=56&fit=crop",views:"2.1M",date:"3 days ago"},
+  {id:"vid002",title:"Building a Neural Network from Scratch",thumbnail:"https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=100&h=56&fit=crop",views:"1.2M",date:"2 weeks ago"},
+  {id:"vid003",title:"Synthwave Music Production Tutorial",thumbnail:"https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=100&h=56&fit=crop",views:"856K",date:"1 month ago"},
+  {id:"vid004",title:"Quantum Computing Explained Simply",thumbnail:"https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=100&h=56&fit=crop",views:"3.4M",date:"1 week ago"},
+  {id:"vid005",title:"Apex Legends Season 20 Pro Tips",thumbnail:"https://images.unsplash.com/photo-1542751371-adc38448a05e?w=100&h=56&fit=crop",views:"980K",date:"5 days ago"},
+  {id:"vid006",title:"The Future of AI in 2026",thumbnail:"https://images.unsplash.com/photo-1677442136019-21780ecad995?w=100&h=56&fit=crop",views:"5.7M",date:"2 days ago"},
+  {id:"vid007",title:"Creating Electronic Music with Modular Synths",thumbnail:"https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=100&h=56&fit=crop",views:"412K",date:"3 weeks ago"},
+  {id:"vid008",title:"Introduction to Blockchain Technology",thumbnail:"https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=100&h=56&fit=crop",views:"1.8M",date:"2 months ago"},
+  {id:"vid009",title:"Sci-Fi Short Film: Neon Nights",thumbnail:"https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=100&h=56&fit=crop",views:"7.2M",date:"6 days ago"},
+  {id:"vid010",title:"Elden Ring Boss Guide: Malenia",thumbnail:"https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=100&h=56&fit=crop",views:"4.5M",date:"1 month ago"},
+  {id:"vid011",title:"Building Microservices with Kubernetes",thumbnail:"https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?w=100&h=56&fit=crop",views:"623K",date:"2 weeks ago"},
+  {id:"vid012",title:"Jazz Piano Improvisation Masterclass",thumbnail:"https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?w=100&h=56&fit=crop",views:"299K",date:"1 month ago"},
+  {id:"vid013",title:"Data Structures and Algorithms Crash Course",thumbnail:"https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=100&h=56&fit=crop",views:"2.9M",date:"3 months ago"},
+  {id:"vid014",title:"Behind the Scenes: VFX Breakdown",thumbnail:"https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=100&h=56&fit=crop",views:"1.1M",date:"2 weeks ago"},
+  {id:"vid015",title:"Valorant Ranked Guide: Iron to Radiant",thumbnail:"https://images.unsplash.com/photo-1552820728-8b83bb6b773f?w=100&h=56&fit=crop",views:"3.3M",date:"4 days ago"},
+  {id:"vid016",title:"Machine Learning Model Deployment",thumbnail:"https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=100&h=56&fit=crop",views:"445K",date:"1 week ago"},
+  {id:"vid017",title:"Music Theory for Producers",thumbnail:"https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=100&h=56&fit=crop",views:"1.5M",date:"3 weeks ago"},
+  {id:"vid018",title:"Understanding Cryptocurrency Trading",thumbnail:"https://images.unsplash.com/photo-1621761191319-c6fb62004040?w=100&h=56&fit=crop",views:"2.2M",date:"5 days ago"}
+];
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   AUTH CHECK — safe, runs after VIDEO_DB
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+(function() {
+  var ok = false;
+  try { ok = (sessionStorage.getItem("csAdmin") === "yes"); } catch(e) {}
+  if (!ok) { location.replace("login.html"); }
+})();
+
+/* ── Update stat ── */
+document.getElementById("sTot").textContent = VIDEO_DB.length;
+
+/* ── Render video list ── */
+var listHTML = "";
+for (var i = 0; i < VIDEO_DB.length; i++) {
+  var v = VIDEO_DB[i];
+  listHTML += '<div class="vrow">'
+    + '<img class="vthumb" src="' + v.thumbnail + '" alt="' + v.title + '" onerror="this.src=\'https://placehold.co/90x51/1a2332/00d9ff?text=N%2FA\'">'
+    + '<div class="vmeta"><div class="vtitle" title="' + v.title + '">' + v.title + '</div>'
+    + '<div class="vviews">' + v.views + ' views &middot; ' + v.date + '</div></div>'
+    + '<div class="vacts">'
+    + '<button class="bico be" onclick="editV(\'' + v.id + '\')" title="Edit">&#9998;</button>'
+    + '<button class="bico bd" onclick="delV(\'' + v.id + '\')" title="Delete">&#128465;</button>'
+    + '</div></div>';
+}
+document.getElementById("vlist").innerHTML = listHTML;
+
+/* ── Actions ── */
+function findV(id) {
+  for (var i = 0; i < VIDEO_DB.length; i++) {
+    if (VIDEO_DB[i].id === id) return VIDEO_DB[i];
+  }
+  return null;
+}
+function editV(id) {
+  var v = findV(id);
+  if (v) showToast('&#9998; Editing: "' + v.title + '"');
+}
+function delV(id) {
+  var v = findV(id);
+  if (v && confirm('Delete "' + v.title + '"?\nThis cannot be undone.')) {
+    showToast('&#128465; Deleted: "' + v.title + '"');
+  }
+}
+function applySettings() {
+  var s = document.getElementById("t1").checked;
+  var a = document.getElementById("t2").checked;
+  var c = document.getElementById("t3").checked;
+  showToast("&#10003; Saved! Site:" + (s ? "ONLINE" : "OFFLINE") + " Admin:" + (a ? "ON" : "OFF") + " Countdown:" + (c ? "ON" : "OFF"));
+}
+function handleUpload() {
+  var t = document.getElementById("uTitle").value.trim();
+  if (!t) { showToast("&#9888; Please enter a video title first"); return; }
+  showToast('&#10003; "' + t + '" queued for upload!');
+  document.getElementById("uTitle").value = "";
+  document.getElementById("uChan").value  = "";
+  document.getElementById("uDesc").value  = "";
+}
+function doLogout() {
+  if (confirm("Logout of admin panel?")) {
+    try { sessionStorage.removeItem("csAdmin"); } catch(e) {}
+    location.href = "login.html";
+  }
+}
+
+/* ── Toast ── */
+var _tt;
+function showToast(msg) {
+  var el = document.getElementById("toastEl");
+  el.innerHTML = msg;
+  el.classList.add("show");
+  clearTimeout(_tt);
+  _tt = setTimeout(function() { el.classList.remove("show"); }, 3500);
+}
+</script>
+</body>
+</html>
