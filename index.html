@@ -88,7 +88,8 @@ body.light .logo-text{color:#0066cc;text-shadow:none}
           <span id="themeIcon">☀️</span><span id="themeLabel">LIGHT MODE</span>
         </button>
         <a href="login.html" class="hdr-btn admin-btn">⚡ ADMIN</a>
-        <a href="maintenance.html" class="hdr-btn" style="border-color:#ff10f0;color:#ff10f0;">🔧 MAINTENANCE</a>
+        <!-- fixed case so it doesn't 404 -->
+        <a href="Maintenance.html" class="hdr-btn" style="border-color:#ff10f0;color:#ff10f0;">🔧 MAINTENANCE</a>
         <span class="sys-pill">● LIVE</span>
       </div>
     </div>
@@ -119,7 +120,7 @@ body.light .logo-text{color:#0066cc;text-shadow:none}
   <section class="grid-sec">
     <div class="grid-hdr">
       <h2 class="grid-title">// AVAILABLE STREAMS</h2>
-      <span class="count-badge" id="countBadge">18 ITEMS</span>
+      <span class="count-badge" id="countBadge">0 ITEMS</span>
     </div>
     <div class="video-grid" id="videoGrid"></div>
     <div class="no-res" id="noRes">
@@ -138,8 +139,8 @@ body.light .logo-text{color:#0066cc;text-shadow:none}
 </footer>
 
 <script>
-/* ── VIDEO DATABASE — defined first, used below ── */
-var VIDEO_DB = [
+/* ── DEFAULT VIDEO DATABASE ── */
+var DEFAULT_VIDEOS = [
   {id:"vid001",title:"Cyberpunk 2077 Ultimate Graphics Mod Showcase",thumbnail:"https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&h=450&fit=crop",src:"https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",description:"Experience the most stunning visual overhaul for Cyberpunk 2077 with ray tracing and next-gen lighting effects. A complete transformation of Night City.",category:"Gaming"},
   {id:"vid002",title:"Building a Neural Network from Scratch",thumbnail:"https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=800&h=450&fit=crop",src:"https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",description:"Learn how to build a complete neural network using Python and NumPy. Understanding backpropagation and gradient descent from the ground up.",category:"Tech"},
   {id:"vid003",title:"Synthwave Music Production Tutorial",thumbnail:"https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800&h=450&fit=crop",src:"https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",description:"Create authentic 80s synthwave tracks with modern production techniques. Complete walkthrough of creating retro-futuristic soundscapes.",category:"Music"},
@@ -160,16 +161,15 @@ var VIDEO_DB = [
   {id:"vid018",title:"Understanding Cryptocurrency Trading",thumbnail:"https://images.unsplash.com/photo-1621761191319-c6fb62004040?w=800&h=450&fit=crop",src:"https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",description:"Navigate the crypto markets with confidence. Technical analysis, risk management, and strategies for day trading and long-term investing.",category:"Education"}
 ];
 
-/* ── Theme ── */
 var activeCat = "all";
 
+/* Theme */
 function toggleTheme() {
   var isLight = document.body.classList.toggle("light");
   document.getElementById("themeIcon").textContent  = isLight ? "🌙" : "☀️";
   document.getElementById("themeLabel").textContent = isLight ? "DARK MODE" : "LIGHT MODE";
   try { localStorage.setItem("csTheme", isLight ? "light" : "dark"); } catch(e) {}
 }
-
 (function() {
   try {
     if (localStorage.getItem("csTheme") === "light") {
@@ -180,17 +180,36 @@ function toggleTheme() {
   } catch(e) {}
 })();
 
-/* ── Render cards ── */
+/* Admin videos from localStorage */
+function loadAdminVideos() {
+  try {
+    var raw = localStorage.getItem("csVideos");
+    if (!raw) return [];
+    var arr = JSON.parse(raw);
+    if (!Array.isArray(arr)) return [];
+    return arr;
+  } catch(e) {
+    return [];
+  }
+}
+
+/* Merge default + admin */
+function getAllVideos() {
+  var admin = loadAdminVideos();
+  return DEFAULT_VIDEOS.concat(admin);
+}
+
+/* Card render */
 function cardHTML(v) {
   return '<div class="vcard" onclick="location.href=\'video.html?id=' + v.id + '\'">'
     + '<div class="vthumb-wrap">'
-    + '<img class="vthumb" src="' + v.thumbnail + '" alt="' + v.title + '" loading="lazy" onerror="this.src=\'https://placehold.co/800x450/1a1f2e/00d9ff?text=VIDEO\'">'
+    + '<img class="vthumb" src="' + (v.thumbnail || 'https://placehold.co/800x450/1a1f2e/00d9ff?text=VIDEO') + '" alt="' + v.title + '" loading="lazy" onerror="this.src=\'https://placehold.co/800x450/1a1f2e/00d9ff?text=VIDEO\'">'
     + '<div class="vplay"><span>&#9654;</span></div>'
     + '</div>'
     + '<div class="vinfo">'
-    + '<span class="vcat">' + v.category.toUpperCase() + '</span>'
+    + '<span class="vcat">' + (v.category || "CUSTOM").toUpperCase() + '</span>'
     + '<div class="vtitle">' + v.title + '</div>'
-    + '<div class="vdesc">' + v.description + '</div>'
+    + '<div class="vdesc">' + (v.description || "No description provided.") + '</div>'
     + '</div></div>';
 }
 
@@ -206,13 +225,15 @@ function render(list) {
   grid.innerHTML = html;
 }
 
+/* Filter using merged list */
 function getFiltered() {
+  var all = getAllVideos();
   var q = document.getElementById("searchInput").value.toLowerCase().trim();
   var result = [];
-  for (var i = 0; i < VIDEO_DB.length; i++) {
-    var v = VIDEO_DB[i];
+  for (var i = 0; i < all.length; i++) {
+    var v = all[i];
     var catOk  = (activeCat === "all" || v.category === activeCat);
-    var srchOk = (!q || v.title.toLowerCase().indexOf(q) >= 0 || v.description.toLowerCase().indexOf(q) >= 0);
+    var srchOk = (!q || v.title.toLowerCase().indexOf(q) >= 0 || (v.description || "").toLowerCase().indexOf(q) >= 0);
     if (catOk && srchOk) result.push(v);
   }
   return result;
@@ -235,8 +256,8 @@ document.getElementById("catRow").addEventListener("click", function(e) {
   doSearch();
 });
 
-/* ── Initial render ── */
-render(VIDEO_DB);
+/* Initial render */
+render(getAllVideos());
 </script>
 </body>
 </html>
