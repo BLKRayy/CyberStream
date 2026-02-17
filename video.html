@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CYBERSTREAM // Player</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0e17;--bg2:#111827;--panel:#1a1f2e;--cyan:#00d9ff;--yellow:#ffed4e;--green:#39ff14;--pink:#ff10f0;--blue:#5ba4cf;--text:#e0e0e0;--muted:#8b96a8;--border:#2a3f5f}
+body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;min-height:100vh;transition:background .4s,color .4s}
+body.light{--bg:#f0f4f8;--bg2:#fff;--panel:#fff;--text:#1a202c;--muted:#4a5568;--border:#cbd5e0}
+.grid-bg{position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(0,217,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,217,255,.03) 1px,transparent 1px);background-size:50px 50px}
+.scanlines{position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.2;background:repeating-linear-gradient(0deg,rgba(0,0,0,.15),rgba(0,0,0,.15) 1px,transparent 1px,transparent 2px)}
+.wrap{max-width:1400px;margin:0 auto;padding:0 2rem;position:relative;z-index:2}
+.main-header{background:linear-gradient(180deg,var(--bg2),rgba(17,24,39,.97));border-bottom:2px solid var(--cyan);box-shadow:0 0 24px rgba(0,217,255,.4);padding:1.2rem 0;position:sticky;top:0;z-index:200;backdrop-filter:blur(10px)}
+body.light .main-header{background:#fff;border-bottom-color:#0066cc}
+.hdr-inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+.logo{display:flex;align-items:center;gap:.7rem;text-decoration:none}
+.logo-icon{font-size:1.8rem;color:var(--cyan);text-shadow:0 0 12px var(--cyan)}
+.logo-text{font-size:1.4rem;font-weight:bold;letter-spacing:3px;color:var(--cyan);text-shadow:0 0 12px rgba(0,217,255,.4)}
+body.light .logo-text{color:#0066cc;text-shadow:none}
+.logo-badge{font-size:.68rem;padding:.2rem .65rem;background:rgba(57,255,20,.1);border:1px solid var(--green);color:var(--green);border-radius:3px;letter-spacing:1px}
+.hdr-right{display:flex;align-items:center;gap:.9rem;flex-wrap:wrap}
+.hdr-btn{display:inline-flex;align-items:center;gap:.45rem;padding:.5rem 1rem;background:var(--panel);border:2px solid var(--border);color:var(--text);border-radius:6px;font-family:'Courier New',monospace;font-size:.82rem;cursor:pointer;text-decoration:none;transition:all .3s;white-space:nowrap}
+.hdr-btn:hover{border-color:var(--cyan);color:var(--cyan);box-shadow:0 0 16px rgba(0,217,255,.4);transform:translateY(-2px)}
+.hdr-btn.admin-btn{border-color:var(--yellow);color:var(--yellow)}
+.hdr-btn.admin-btn:hover{box-shadow:0 0 16px rgba(255,237,78,.4)}
+.sys-pill{font-size:.78rem;padding:.38rem .85rem;background:rgba(57,255,20,.08);border:1px solid var(--green);color:var(--green);border-radius:4px;letter-spacing:1px}
+/* Player */
+.player-wrap{margin:2.5rem 0;background:var(--panel);border:2px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:0 0 30px rgba(0,217,255,.12)}
+.video-el{width:100%;aspect-ratio:16/9;background:#000;display:block}
+.player-info{padding:1.8rem;border-top:2px solid var(--border)}
+.player-top{display:flex;justify-content:space-between;align-items:flex-start;gap:2rem;flex-wrap:wrap}
+.player-cat{display:inline-block;font-size:.75rem;letter-spacing:1px;color:var(--yellow);background:rgba(255,237,78,.1);border:1px solid var(--yellow);border-radius:3px;padding:.25rem .85rem;margin-bottom:.75rem}
+.player-title{font-size:1.8rem;color:var(--text);line-height:1.3;margin-bottom:.8rem}
+.player-desc{font-size:.95rem;color:var(--muted);line-height:1.7}
+.back-btn{display:inline-flex;align-items:center;gap:.5rem;white-space:nowrap;background:var(--bg2);border:2px solid var(--border);color:var(--text);padding:.7rem 1.4rem;border-radius:6px;text-decoration:none;font-family:'Courier New',monospace;font-size:.88rem;letter-spacing:1px;transition:all .3s}
+.back-btn:hover{border-color:var(--cyan);color:var(--cyan);box-shadow:0 0 16px rgba(0,217,255,.4);transform:translateY(-2px)}
+/* Recommended */
+.rec-section{margin:2.5rem 0}
+.rec-header{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:2px solid var(--border)}
+.rec-title{font-size:1.4rem;color:var(--cyan);letter-spacing:2px;text-shadow:0 0 10px rgba(0,217,255,.4)}
+.rec-count{padding:.35rem 1rem;background:rgba(57,255,20,.1);border:1px solid var(--green);color:var(--green);border-radius:5px;font-size:.85rem}
+.rec-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.5rem}
+.vcard{background:var(--panel);border:2px solid var(--border);border-radius:10px;overflow:hidden;cursor:pointer;transition:all .3s}
+.vcard:hover{transform:translateY(-8px);border-color:var(--cyan);box-shadow:0 16px 50px rgba(0,217,255,.4)}
+.vcard:hover .vthumb{filter:brightness(1.15)}
+.vcard:hover .vtitle{color:var(--cyan)}
+.vthumb-wrap{position:relative;overflow:hidden}
+.vthumb{width:100%;height:175px;object-fit:cover;display:block;transition:all .3s;border-bottom:2px solid var(--border)}
+.vplay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.4);opacity:0;transition:all .3s}
+.vplay span{font-size:2.5rem;color:var(--cyan);text-shadow:0 0 20px var(--cyan)}
+.vcard:hover .vplay{opacity:1}
+.vinfo{padding:1rem}
+.vcat{display:inline-block;font-size:.65rem;letter-spacing:1px;color:var(--yellow);background:rgba(255,237,78,.1);border:1px solid var(--yellow);border-radius:3px;padding:.15rem .6rem;margin-bottom:.5rem}
+.vtitle{font-size:.95rem;color:var(--text);margin-bottom:.35rem;line-height:1.4;transition:color .3s;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.vdesc{font-size:.78rem;color:var(--muted);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+/* Error */
+.err-box{text-align:center;padding:6rem 2rem}
+.err-inner{display:inline-block;padding:2rem 3rem;background:rgba(255,16,240,.08);border:2px solid var(--pink);border-radius:10px;color:var(--pink)}
+.err-code{font-size:3rem;font-weight:bold;margin-bottom:.8rem;text-shadow:0 0 20px var(--pink)}
+.err-msg{font-size:1.15rem;margin-bottom:1.5rem}
+/* Footer */
+.main-footer{background:var(--bg2);border-top:2px solid var(--cyan);padding:1.4rem 0;margin-top:4rem;box-shadow:0 0 20px rgba(0,217,255,.3);position:relative;z-index:2}
+.ftr-row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+.ftr-text{font-size:.82rem;color:var(--muted);letter-spacing:1px}
+.ftr-status{display:flex;align-items:center;gap:.5rem;color:var(--green);font-size:.82rem}
+.ftr-dot{width:8px;height:8px;background:var(--green);border-radius:50%;box-shadow:0 0 8px var(--green)}
+@media(max-width:768px){.wrap{padding:0 1rem}.player-top{flex-direction:column}.player-title{font-size:1.3rem}.rec-grid{grid-template-columns:1fr}.hdr-inner{flex-direction:column;align-items:flex-start}}
+</style>
+</head>
+<body>
+<div class="scanlines"></div>
+<div class="grid-bg"></div>
+
+<header class="main-header">
+  <div class="wrap">
+    <div class="hdr-inner">
+      <a href="index.html" class="logo">
+        <span class="logo-icon">▶</span>
+        <span class="logo-text">CYBERSTREAM</span>
+        <span class="logo-badge">ONLINE</span>
+      </a>
+      <div class="hdr-right">
+        <button class="hdr-btn" onclick="toggleTheme()">
+          <span id="themeIcon">☀️</span><span id="themeLabel">LIGHT MODE</span>
+        </button>
+        <a href="login.html" class="hdr-btn admin-btn">⚡ ADMIN</a>
+        <span class="sys-pill">● LIVE</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="playerArea"></div>
+  <div id="recArea"></div>
+</main>
+
+<footer class="main-footer">
+  <div class="wrap">
+    <div class="ftr-row">
+      <span class="ftr-text">CYBERSTREAM © 2026 // ALL SYSTEMS MONITORED</span>
+      <div class="ftr-status"><span class="ftr-dot"></span>&nbsp;CONNECTION SECURE</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ── VIDEO DATABASE — defined first ── */
+var VIDEO_DB = [
+  {id:"vid001",title:"Cyberpunk 2077 Ultimate Graphics Mod Showcase",thumbnail:"https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&h=450&fit=crop",src:"https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",description:"Experience the most stunning visual overhaul for Cyberpunk 2077 with ray tracing and next-gen lighting effects. A complete transformation of Night City.",category:"Gaming"},
+  {id:"vid002",title:"Building a Neural Network from Scratch",thumbnail:"https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=800&h=450&fit=crop",src:"https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",description:"Learn how to build a complete neural network using Python and NumPy. Understanding backpropagation and gradient descent from the ground up.",category:"Tech"},
+  {id:"vid003",title:"Synthwave Music Production Tutorial",thumbnail:"https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800&h=450&fit=crop",src:"https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",description:"Create authentic 80s synthwave tracks with modern production techniques. Complete walkthrough of creating retro-futuristic soundscapes.",category:"Music"},
+  {id:"vid004",title:"Quantum Computing Explained Simply",thumbnail:"https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&h=450&fit=crop",src:"https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",description:"Demystifying quantum computing including superposition, entanglement, and quantum gates. Perfect for beginners entering the quantum realm.",category:"Education"},
+  {id:"vid005",title:"Apex Legends Season 20 Pro Tips",thumbnail:"https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&h=450&fit=crop",src:"https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",description:"Master the new legend abilities and map changes in Season 20. Advanced movement techniques and positioning strategies from top-ranked players.",category:"Gaming"},
+  {id:"vid006",title:"The Future of AI in 2026",thumbnail:"https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=450&fit=crop",src:"https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",description:"Exploring breakthrough developments in AI including multimodal models, AI agents, and autonomous systems reshaping our world.",category:"Tech"},
+  {id:"vid007",title:"Creating Electronic Music with Modular Synths",thumbnail:"https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=800&h=450&fit=crop",src:"https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4",description:"Dive into the world of modular synthesis. Patching techniques, signal flow, and creating unique sounds with Eurorack modules.",category:"Music"},
+  {id:"vid008",title:"Introduction to Blockchain Technology",thumbnail:"https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=800&h=450&fit=crop",src:"https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",description:"Understanding distributed ledgers, consensus mechanisms, and smart contracts. A comprehensive introduction to blockchain fundamentals.",category:"Education"},
+  {id:"vid009",title:"Sci-Fi Short Film: Neon Nights",thumbnail:"https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800&h=450&fit=crop",src:"https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4",description:"An original cyberpunk short film set in a dystopian megacity. Follow a hacker's journey through the neon-lit streets of the future.",category:"Entertainment"},
+  {id:"vid010",title:"Elden Ring Boss Guide: Malenia",thumbnail:"https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=800&h=450&fit=crop",src:"https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",description:"Complete strategy guide for defeating one of the hardest bosses in gaming history. Phase by phase breakdown with recommended builds.",category:"Gaming"},
+  {id:"vid011",title:"Building Microservices with Kubernetes",thumbnail:"https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?w=800&h=450&fit=crop",src:"https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4",description:"Deploy scalable microservices architecture using Kubernetes. Container orchestration, service mesh, and best practices for production.",category:"Tech"},
+  {id:"vid012",title:"Jazz Piano Improvisation Masterclass",thumbnail:"https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?w=800&h=450&fit=crop",src:"https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4",description:"Learn jazz improvisation from chord voicings to scale choices. Advanced concepts for fluid solos over complex changes.",category:"Music"},
+  {id:"vid013",title:"Data Structures and Algorithms Crash Course",thumbnail:"https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=800&h=450&fit=crop",src:"https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WhatCarCanYouGetForAGrand.mp4",description:"Master essential data structures and algorithms for technical interviews. Trees, graphs, dynamic programming, and optimization.",category:"Education"},
+  {id:"vid014",title:"Behind the Scenes: VFX Breakdown",thumbnail:"https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=800&h=450&fit=crop",src:"https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",description:"Discover how modern visual effects are created. CGI techniques, motion tracking, and compositing workflows explained.",category:"Entertainment"},
+  {id:"vid015",title:"Valorant Ranked Guide: Iron to Radiant",thumbnail:"https://images.unsplash.com/photo-1552820728-8b83bb6b773f?w=800&h=450&fit=crop",src:"https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",description:"Complete roadmap to climbing in Valorant. Agent selection, map control, economy management, and team coordination.",category:"Gaming"},
+  {id:"vid016",title:"Machine Learning Model Deployment",thumbnail:"https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=800&h=450&fit=crop",src:"https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",description:"Production ML systems from training to deployment. MLOps practices, monitoring, versioning, and continuous integration.",category:"Tech"},
+  {id:"vid017",title:"Music Theory for Producers",thumbnail:"https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=800&h=450&fit=crop",src:"https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",description:"Essential music theory for electronic music producers. Scales, chord progressions, melody writing, and harmonic analysis.",category:"Music"},
+  {id:"vid018",title:"Understanding Cryptocurrency Trading",thumbnail:"https://images.unsplash.com/photo-1621761191319-c6fb62004040?w=800&h=450&fit=crop",src:"https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",description:"Navigate crypto markets with confidence. Technical analysis, risk management, and trading strategies explained.",category:"Education"}
+];
+
+/* ── Theme ── */
+function toggleTheme() {
+  var isLight = document.body.classList.toggle("light");
+  document.getElementById("themeIcon").textContent  = isLight ? "🌙" : "☀️";
+  document.getElementById("themeLabel").textContent = isLight ? "DARK MODE" : "LIGHT MODE";
+  try { localStorage.setItem("csTheme", isLight ? "light" : "dark"); } catch(e) {}
+}
+(function() {
+  try {
+    if (localStorage.getItem("csTheme") === "light") {
+      document.body.classList.add("light");
+      document.getElementById("themeIcon").textContent  = "🌙";
+      document.getElementById("themeLabel").textContent = "DARK MODE";
+    }
+  } catch(e) {}
+})();
+
+/* ── Init ── */
+function init() {
+  var id    = (new URLSearchParams(window.location.search)).get("id");
+  var video = null;
+  for (var i = 0; i < VIDEO_DB.length; i++) {
+    if (VIDEO_DB[i].id === id) { video = VIDEO_DB[i]; break; }
+  }
+
+  if (!video) {
+    document.getElementById("playerArea").innerHTML =
+      '<div class="err-box"><div class="err-inner">'
+      + '<div class="err-code">ERROR 404</div>'
+      + '<div class="err-msg">VIDEO NOT FOUND</div>'
+      + '<a href="index.html" class="back-btn">\u2190 RETURN TO DATABASE</a>'
+      + '</div></div>';
+    return;
+  }
+
+  document.title = video.title + " // CYBERSTREAM";
+
+  document.getElementById("playerArea").innerHTML =
+    '<div class="player-wrap" style="margin-top:2rem;">'
+    + '<video class="video-el" controls autoplay playsinline'
+    + ' onerror="this.parentNode.innerHTML=\'<div style=padding:3rem;text-align:center;background:#000;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;color:#ff10f0;font-size:1.1rem;>\u26a0 Video source unavailable</div>\'">'
+    + '<source src="' + video.src + '" type="video/mp4">'
+    + 'Your browser does not support HTML5 video.'
+    + '</video>'
+    + '<div class="player-info">'
+    + '<div class="player-top">'
+    + '<div>'
+    + '<span class="player-cat">' + video.category.toUpperCase() + '</span>'
+    + '<h1 class="player-title">' + video.title + '</h1>'
+    + '<p class="player-desc">' + video.description + '</p>'
+    + '</div>'
+    + '<a href="index.html" class="back-btn">\u2190 BACK TO GRID</a>'
+    + '</div>'
+    + '</div></div>';
+
+  var recs = [];
+  for (var j = 0; j < VIDEO_DB.length; j++) {
+    if (VIDEO_DB[j].id !== video.id) recs.push(VIDEO_DB[j]);
+    if (recs.length >= 6) break;
+  }
+
+  var recHTML = '<section class="rec-section"><div class="rec-header">'
+    + '<h2 class="rec-title">// RECOMMENDED STREAMS</h2>'
+    + '<span class="rec-count">' + recs.length + ' ITEMS</span>'
+    + '</div><div class="rec-grid">';
+
+  for (var k = 0; k < recs.length; k++) {
+    var v = recs[k];
+    recHTML += '<div class="vcard" onclick="location.href=\'video.html?id=' + v.id + '\'">'
+      + '<div class="vthumb-wrap">'
+      + '<img class="vthumb" src="' + v.thumbnail + '" alt="' + v.title + '" loading="lazy" onerror="this.src=\'https://placehold.co/800x450/1a1f2e/00d9ff?text=VIDEO\'">'
+      + '<div class="vplay"><span>&#9654;</span></div>'
+      + '</div>'
+      + '<div class="vinfo">'
+      + '<span class="vcat">' + v.category.toUpperCase() + '</span>'
+      + '<div class="vtitle">' + v.title + '</div>'
+      + '<div class="vdesc">' + v.description + '</div>'
+      + '</div></div>';
+  }
+  recHTML += '</div></section>';
+  document.getElementById("recArea").innerHTML = recHTML;
+}
+
+init();
+</script>
+</body>
+</html>
