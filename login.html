@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADMIN LOGIN // CYBERSTREAM</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{background:#0d1117;font-family:'Courier New',monospace;min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.grid-bg{position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(0,217,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,217,255,.04) 1px,transparent 1px);background-size:50px 50px}
+.scanlines{position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.18;background:repeating-linear-gradient(0deg,rgba(0,0,0,.15),rgba(0,0,0,.15) 1px,transparent 1px,transparent 2px)}
+.box{position:relative;z-index:10;width:100%;max-width:480px;margin:2rem;background:linear-gradient(135deg,#1a3a52,#0d1117);border:3px solid #00d9ff;border-radius:14px;padding:3rem;box-shadow:0 0 60px rgba(0,217,255,.4)}
+.box::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#00d9ff,#0ff);border-radius:14px 14px 0 0;box-shadow:0 0 20px #00d9ff}
+.lock{text-align:center;font-size:4rem;margin-bottom:1rem;filter:drop-shadow(0 0 20px #ffed4e);animation:lp 2s infinite}
+@keyframes lp{0%,100%{opacity:1}50%{opacity:.65}}
+h1{text-align:center;font-size:2rem;color:#00d9ff;text-shadow:0 0 20px rgba(0,217,255,.8);letter-spacing:4px;margin-bottom:.4rem}
+.sub{text-align:center;color:#5ba4cf;font-size:.85rem;letter-spacing:2px;margin-bottom:2.5rem}
+label{display:block;font-size:.8rem;color:#5ba4cf;letter-spacing:2px;margin-bottom:.6rem}
+input[type=password]{width:100%;padding:1rem;border-radius:6px;background:rgba(0,0,0,.5);border:2px solid rgba(0,217,255,.3);color:#e0e0e0;font-family:'Courier New',monospace;font-size:1rem;outline:none;transition:all .3s;margin-bottom:1.5rem;letter-spacing:2px}
+input[type=password]:focus,input[type=password]:hover{border-color:#00d9ff;box-shadow:0 0 20px rgba(0,217,255,.4);background:rgba(0,217,255,.05)}
+.btn-login{width:100%;padding:1.1rem;border:none;border-radius:6px;background:linear-gradient(135deg,#00d9ff,#0ff);color:#0d1117;font-family:'Courier New',monospace;font-size:1rem;font-weight:bold;letter-spacing:3px;cursor:pointer;transition:all .3s;box-shadow:0 0 28px rgba(0,217,255,.5)}
+.btn-login:hover{transform:translateY(-3px);box-shadow:0 6px 40px rgba(0,217,255,.8)}
+.btn-login:active{transform:translateY(-1px)}
+.err{background:rgba(255,16,240,.1);border:2px solid #ff10f0;color:#ff10f0;padding:.9rem;border-radius:6px;text-align:center;margin-bottom:1.2rem;display:none;animation:shake .45s}
+.err.show{display:block}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px)}60%{transform:translateX(10px)}}
+.secure{text-align:center;margin-top:1.5rem;padding:.8rem;background:rgba(57,255,20,.08);border:1px solid rgba(57,255,20,.3);border-radius:6px;font-size:.8rem;color:#39ff14}
+.back-link{text-align:center;margin-top:1.2rem}
+.back-link a{color:#5ba4cf;text-decoration:none;font-size:.85rem;letter-spacing:1px;transition:all .3s}
+.back-link a:hover{color:#00d9ff;text-shadow:0 0 10px #00d9ff}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="scanlines"></div>
+
+<div class="box">
+  <div class="lock">&#128274;</div>
+  <h1>ADMIN ACCESS</h1>
+  <p class="sub">AUTHORIZATION REQUIRED</p>
+
+  <div class="err" id="errMsg">&#9888; INVALID PASSWORD &mdash; ACCESS DENIED</div>
+
+  <form id="loginForm" onsubmit="doLogin(event)">
+    <label for="pw">PASSWORD</label>
+    <input type="password" id="pw" placeholder="Enter admin password..." autocomplete="off">
+    <button type="submit" class="btn-login">ACCESS ADMIN TERMINAL</button>
+  </form>
+
+  <div class="secure">&#128737; SECURE CONNECTION ESTABLISHED</div>
+  <div class="back-link"><a href="index.html">&#8592; RETURN TO HOMEPAGE</a></div>
+</div>
+
+<script>
+/* Redirect if already logged in */
+try { if (sessionStorage.getItem("csAdmin") === "yes") location.replace("admin.html"); } catch(e) {}
+
+function doLogin(e) {
+  e.preventDefault();
+  var pw = document.getElementById("pw").value;
+  if (pw === "loyal") {
+    try { sessionStorage.setItem("csAdmin", "yes"); } catch(e) {}
+    location.href = "admin.html";
+  } else {
+    var err = document.getElementById("errMsg");
+    var inp = document.getElementById("pw");
+    err.classList.remove("show");
+    /* force reflow so animation replays */
+    void err.offsetWidth;
+    err.classList.add("show");
+    inp.value = "";
+    inp.style.borderColor = "#ff10f0";
+    setTimeout(function() {
+      err.classList.remove("show");
+      inp.style.borderColor = "rgba(0,217,255,.3)";
+    }, 3000);
+  }
+}
+</script>
+</body>
+</html>
