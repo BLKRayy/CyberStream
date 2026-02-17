@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SYSTEM MAINTENANCE // CYBERSTREAM</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0e14;font-family:'Courier New',monospace;color:#e0e0e0;min-height:100vh;overflow-x:hidden}
+.hazard{position:fixed;left:0;width:100%;height:80px;z-index:100;background:repeating-linear-gradient(45deg,#000 0,#000 30px,#ffed4e 30px,#ffed4e 60px)}
+.ht{top:0}.hb{bottom:0}
+.page{max-width:1100px;margin:0 auto;padding:110px 2rem 110px}
+/* Warning */
+.warn{text-align:center;padding-bottom:3rem}
+.tri-wrap{width:180px;height:156px;margin:0 auto 2.5rem;position:relative}
+.tri{width:0;height:0;border-left:90px solid transparent;border-right:90px solid transparent;border-bottom:156px solid #ffed4e;filter:drop-shadow(0 0 40px rgba(255,237,78,.9));animation:tp 2s infinite}
+.tri-bang{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);font-size:5.5rem;line-height:1;color:#0a0e14;font-weight:900;user-select:none}
+@keyframes tp{0%,100%{filter:drop-shadow(0 0 35px rgba(255,237,78,.8))}50%{filter:drop-shadow(0 0 65px rgba(255,237,78,1))}}
+h1{font-size:3.8rem;font-weight:bold;color:#ffed4e;text-shadow:0 0 40px rgba(255,237,78,.9);letter-spacing:10px;margin-bottom:.7rem;animation:flick 4s infinite}
+@keyframes flick{0%,100%{opacity:1}48%{opacity:.85}50%{opacity:1}95%{opacity:.9}97%{opacity:1}}
+.sub{font-size:1.1rem;color:#5ba4cf;letter-spacing:6px}
+/* Content box */
+.cbox{background:rgba(10,14,20,.85);border:3px solid #ffed4e;position:relative;padding:3rem;margin-bottom:3rem;box-shadow:0 0 60px rgba(255,237,78,.25)}
+.cbox::before{content:'';position:absolute;top:0;left:0;width:5px;height:100%;background:#ffed4e;box-shadow:0 0 20px #ffed4e}
+.msg{text-align:center;font-size:1rem;line-height:2;margin-bottom:3rem}
+.hl{color:#ffed4e;font-weight:bold}
+.dots::after{content:'';animation:dotanim 1.6s steps(4,end) infinite}
+@keyframes dotanim{0%,20%{content:''}40%{content:'.'}60%{content:'..'}80%,100%{content:'...'}}
+/* Countdown */
+.cd-label{text-align:center;font-size:.85rem;color:#5ba4cf;letter-spacing:4px;margin-bottom:1.8rem}
+.cd-row{display:flex;justify-content:center;gap:3rem;margin-bottom:3rem;flex-wrap:wrap}
+.cd-box{background:rgba(0,0,0,.65);border:2px solid #00d9ff;min-width:130px;padding:2rem 2.5rem;text-align:center;position:relative;box-shadow:0 0 30px rgba(0,217,255,.4);transition:all .3s}
+.cd-box:hover{transform:scale(1.06);box-shadow:0 0 50px rgba(0,217,255,.7)}
+.cd-box::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:#00d9ff;box-shadow:0 0 12px #00d9ff}
+.cd-num{font-size:4.5rem;font-weight:bold;color:#00d9ff;text-shadow:0 0 30px rgba(0,217,255,1);line-height:1;margin-bottom:.4rem}
+.cd-lbl{font-size:.75rem;color:#5ba4cf;letter-spacing:2px}
+/* Progress */
+.prog-sec{margin-bottom:2.5rem}
+.prog-hdr{display:flex;justify-content:space-between;margin-bottom:.5rem}
+.prog-lbl{font-size:.82rem;color:#5ba4cf;letter-spacing:2px}
+.prog-pct{font-size:.82rem;color:#e0e0e0;font-weight:bold}
+.prog-track{height:10px;background:rgba(0,0,0,.5);border:1px solid #00d9ff;overflow:hidden}
+.prog-fill{height:100%;width:67%;background:linear-gradient(90deg,#ff10f0,#00d9ff);transition:width .6s ease;box-shadow:0 0 20px rgba(0,217,255,.8);position:relative}
+.prog-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);animation:shimmer 2s infinite}
+@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+/* Status cards */
+.sc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.5rem}
+.sc{background:rgba(0,0,0,.55);border:2px solid #00d9ff;padding:1.6rem;transition:all .3s}
+.sc:hover{transform:translateY(-5px);box-shadow:0 8px 35px rgba(0,217,255,.45);border-color:#0ff}
+.sc-lbl{font-size:.72rem;color:#5ba4cf;letter-spacing:2px;margin-bottom:.8rem;text-transform:uppercase}
+.sc-val{font-size:1.9rem;font-weight:bold;text-shadow:0 0 18px currentColor}
+.cy{color:#ffed4e}.cg{color:#39ff14}
+/* Separator */
+.sep{height:3px;margin:3rem 0;background:linear-gradient(90deg,transparent,#ffed4e,transparent);box-shadow:0 0 16px rgba(255,237,78,.5)}
+/* Contact */
+.contact{padding-left:1.5rem;border-left:4px solid #ff10f0;box-shadow:-4px 0 20px rgba(255,16,240,.3)}
+.ctitle{font-size:1.4rem;color:#ff10f0;letter-spacing:3px;text-shadow:0 0 20px rgba(255,16,240,.8);margin-bottom:1.2rem}
+.cbody{color:#e0e0e0;font-size:.95rem;line-height:2.2}
+.cbody strong{color:#5ba4cf}
+.cbody a{color:#00d9ff;text-decoration:none;transition:all .3s}
+.cbody a:hover{color:#0ff;text-shadow:0 0 10px #0ff}
+/* Socials */
+.socials{display:flex;gap:2rem;justify-content:center;margin-top:2.5rem;flex-wrap:wrap}
+.soc{font-size:2.2rem;cursor:pointer;transition:all .3s;filter:grayscale(.5);padding:.5rem}
+.soc:hover{transform:scale(1.25);filter:grayscale(0);text-shadow:0 0 20px #00d9ff}
+/* Return */
+.ret{text-align:center;margin-top:2.5rem}
+.ret a{display:inline-flex;align-items:center;gap:.5rem;color:#5ba4cf;text-decoration:none;font-size:.9rem;letter-spacing:1px;padding:.7rem 1.5rem;border:2px solid #5ba4cf;border-radius:6px;transition:all .3s}
+.ret a:hover{color:#00d9ff;border-color:#00d9ff;box-shadow:0 0 18px rgba(0,217,255,.4);transform:translateY(-2px)}
+@media(max-width:768px){h1{font-size:2.2rem;letter-spacing:5px}.cd-row{gap:1.2rem}.cd-box{min-width:90px;padding:1.2rem 1.5rem}.cd-num{font-size:3rem}.cbox{padding:2rem 1.5rem}}
+</style>
+</head>
+<body>
+<div class="hazard ht"></div>
+<div class="hazard hb"></div>
+
+<div class="page">
+  <div class="warn">
+    <div class="tri-wrap">
+      <div class="tri"></div>
+      <div class="tri-bang">!</div>
+    </div>
+    <h1>SYSTEM MAINTENANCE</h1>
+    <p class="sub">UPGRADING INFRASTRUCTURE</p>
+  </div>
+
+  <div class="cbox">
+    <p class="msg">We're currently performing <span class="hl">scheduled maintenance</span> to improve your experience. Our systems will be back online shortly<span class="dots"></span></p>
+
+    <div class="cd-label">ESTIMATED TIME REMAINING</div>
+    <div class="cd-row">
+      <div class="cd-box"><div class="cd-num" id="cdH">02</div><div class="cd-lbl">HOURS</div></div>
+      <div class="cd-box"><div class="cd-num" id="cdM">34</div><div class="cd-lbl">MINUTES</div></div>
+      <div class="cd-box"><div class="cd-num" id="cdS">08</div><div class="cd-lbl">SECONDS</div></div>
+    </div>
+
+    <div class="prog-sec">
+      <div class="prog-hdr">
+        <span class="prog-lbl">MAINTENANCE PROGRESS</span>
+        <span class="prog-pct" id="pct">67%</span>
+      </div>
+      <div class="prog-track"><div class="prog-fill" id="pbar" style="width:67%"></div></div>
+    </div>
+
+    <div class="sc-grid">
+      <div class="sc"><div class="sc-lbl">DATABASE</div><div class="sc-val cy">UPDATING</div></div>
+      <div class="sc"><div class="sc-lbl">API SERVICES</div><div class="sc-val cg">ONLINE</div></div>
+      <div class="sc"><div class="sc-lbl">CDN STATUS</div><div class="sc-val cg">ONLINE</div></div>
+      <div class="sc"><div class="sc-lbl">FILE STORAGE</div><div class="sc-val cy">MIGRATING</div></div>
+    </div>
+  </div>
+
+  <div class="sep"></div>
+
+  <div class="contact">
+    <h2 class="ctitle">NEED IMMEDIATE ASSISTANCE?</h2>
+    <div class="cbody">
+      For urgent inquiries, please contact us at:<br>
+      <strong>Email:</strong> <a href="mailto:support@cyberstream.live">support@cyberstream.live</a><br>
+      <strong>Status Updates:</strong> <a href="#">status.cyberstream.live</a>
+    </div>
+    <div class="socials">
+      <span class="soc" title="Twitter">&#x1F426;</span>
+      <span class="soc" title="Discord">&#x1F4AC;</span>
+      <span class="soc" title="Support">&#x1F527;</span>
+      <span class="soc" title="Docs">&#x1F4DA;</span>
+    </div>
+  </div>
+
+  <div class="ret"><a href="index.html">&#8592; RETURN TO HOMEPAGE</a></div>
+</div>
+
+<script>
+var END = Date.now() + (2 * 3600 + 34 * 60) * 1000;
+function tick() {
+  var diff = Math.max(0, END - Date.now());
+  var h = Math.floor(diff / 3600000);
+  var m = Math.floor((diff % 3600000) / 60000);
+  var s = Math.floor((diff % 60000) / 1000);
+  document.getElementById("cdH").textContent = ("0"+h).slice(-2);
+  document.getElementById("cdM").textContent = ("0"+m).slice(-2);
+  document.getElementById("cdS").textContent = ("0"+s).slice(-2);
+}
+tick();
+setInterval(tick, 1000);
+
+var prog = 67;
+setInterval(function() {
+  prog = Math.min(prog + Math.random() * 2, 95);
+  var p = Math.round(prog);
+  document.getElementById("pbar").style.width = p + "%";
+  document.getElementById("pct").textContent  = p + "%";
+}, 4000);
+</script>
+</body>
+</html>
